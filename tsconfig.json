@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"module": "CommonJS",
+		"target": "ES2017",
+		"types": ["node"],
+		"declaration": true,
+		"declarationMap": true,
+		"outDir": "./dist",
+		"strict": true,
+		"moduleResolution": "node",
+		"rootDirs": ["./src"],
+		"typeRoots": ["./node_modules/@types"],
+		"esModuleInterop": true,
+		"inlineSourceMap": false,
+		"inlineSources": false,
+		"forceConsistentCasingInFileNames": true
+	},
+	"exclude": [
+		"node_modules"
+	]
+}
