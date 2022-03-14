@@ -45,6 +45,10 @@ export interface ProgressBarOptions {
     * Incomplete character defaulting to "-".
     */
     incompleteChar?: string;
+    /**
+     * terminal line
+    */
+    line?: number;
 }
 /**
  * Initialize a `ProgressBar` with `options`.
@@ -90,6 +94,7 @@ export declare class ProgressBar {
     private _onComplete;
     private _completeChar;
     private _incompleteChar;
+    private _line?;
     get completed(): boolean;
     get current(): number;
     get total(): number;

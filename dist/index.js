@@ -34,7 +34,7 @@ const os_1 = require("os");
 class ProgressBar {
     constructor(options) {
         this._completed = false;
-        const { format, total, current, width, stream, onComplete, clear, throttle, completeChar, incompleteChar, } = options !== null && options !== void 0 ? options : {};
+        const { format, total, current, width, stream, onComplete, clear, throttle, completeChar, incompleteChar, line, } = options !== null && options !== void 0 ? options : {};
         this._format = format !== null && format !== void 0 ? format : '{bar} {percent}';
         this._total = total !== null && total !== void 0 ? total : 100;
         this._stream = stream !== null && stream !== void 0 ? stream : process.stderr;
@@ -45,6 +45,12 @@ class ProgressBar {
         this._completeChar = completeChar !== null && completeChar !== void 0 ? completeChar : C_COMPLETE;
         this._incompleteChar = incompleteChar !== null && incompleteChar !== void 0 ? incompleteChar : C_INCOMPLETE;
         this._clear = clear !== null && clear !== void 0 ? clear : false;
+        if (typeof line === 'number') {
+            if (line < 0) {
+                throw new Error('line must be >= 0');
+            }
+            this._line = line;
+        }
         this._tokens = {};
         this._lastDraw = '';
         if (!this._format.includes('{bar}'))
@@ -78,7 +84,7 @@ class ProgressBar {
             if (this._clear) {
                 if (this._stream.clearLine) {
                     this._stream.clearLine(-1);
-                    this._stream.cursorTo(0);
+                    this._stream.cursorTo(0, this._line);
                 }
             }
             else {
@@ -89,7 +95,7 @@ class ProgressBar {
     }
     interrupt(message) {
         this._stream.clearLine(0);
-        this._stream.cursorTo(0);
+        this._stream.cursorTo(0, this._line);
         this._stream.write(message);
         this._stream.write('\n');
         // re-display the progress bar with its lastDraw
@@ -143,7 +149,7 @@ class ProgressBar {
             Object.entries(this._tokens).forEach(([key, value]) => output = output.replace(`[${key}]`, value));
         }
         if (this._lastDraw !== output) {
-            this._stream.cursorTo(0);
+            this._stream.cursorTo(0, this._line);
             this._stream.write(output);
             this._stream.clearLine(1);
             this._lastDraw = output;
