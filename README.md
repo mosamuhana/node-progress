@@ -47,6 +47,7 @@ let timer = setInterval(() => {
 | `throttle`   | minimum time between updates in milliseconds defaulting to 16 |
 | `onComplete` | optional function to call when the progress bar completes |
 | `clear`      | will clear the progress bar upon termination |
+| `line`       | terminal line |
 
 ### Tokens: (builtin tokens)
 These are tokens you can use in the format of your progress bar.

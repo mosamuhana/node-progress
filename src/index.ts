@@ -56,6 +56,11 @@ export interface ProgressBarOptions {
   * Incomplete character defaulting to "-".
   */
   incompleteChar?: string;
+
+	/**
+	 * terminal line
+	*/
+	line?: number;
 }
 
 /**
@@ -103,6 +108,7 @@ export class ProgressBar {
   private _onComplete: CompleteFn;
   private _completeChar: string;
   private _incompleteChar: string;
+  private _line?: number;
 
   public get completed(): boolean { return this._completed; }
   public get current(): number { return this._current; }
@@ -116,7 +122,7 @@ export class ProgressBar {
   constructor(options?: ProgressBarOptions) {
     const {
       format, total, current, width, stream, onComplete,
-      clear, throttle, completeChar, incompleteChar,
+      clear, throttle, completeChar, incompleteChar, line,
     } = options ?? {};
 
     this._format = format ?? '{bar} {percent}';
@@ -129,6 +135,12 @@ export class ProgressBar {
     this._completeChar = completeChar ?? C_COMPLETE;
     this._incompleteChar = incompleteChar ?? C_INCOMPLETE;
     this._clear = clear ?? false;
+		if (typeof line === 'number') {
+			if (line < 0) {
+				throw new Error('line must be >= 0');
+			}
+			this._line = line;
+		}
 
     this._tokens = {};
     this._lastDraw = '';
@@ -159,7 +171,7 @@ export class ProgressBar {
       if (this._clear) {
         if (this._stream.clearLine) {
           this._stream.clearLine(-1);
-          this._stream.cursorTo(0);
+          this._stream.cursorTo(0, this._line);
         }
       } else {
         this._stream.write('\n');
@@ -171,7 +183,7 @@ export class ProgressBar {
 
 	public interrupt(message: string) {
 		this._stream.clearLine(0);
-		this._stream.cursorTo(0);
+		this._stream.cursorTo(0, this._line);
 		this._stream.write(message);
 		this._stream.write('\n');
 		// re-display the progress bar with its lastDraw
@@ -232,7 +244,7 @@ export class ProgressBar {
     }
 
     if (this._lastDraw !== output) {
-      this._stream.cursorTo(0);
+      this._stream.cursorTo(0, this._line);
       this._stream.write(output);
       this._stream.clearLine(1);
       this._lastDraw = output;
