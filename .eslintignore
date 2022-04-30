@@ -1,6 +1,5 @@
-coverage
-node_modules
-.git
-.github
-test/files/html5player
-test/files/videos
+/dist
+/node_modules
+/test/fixtures
+
+!.eslintrc.js

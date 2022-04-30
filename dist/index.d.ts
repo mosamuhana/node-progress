@@ -1,10 +1,30 @@
-/// <reference types="node" />
-declare type CompleteFn = (bar: ProgressBar) => void;
+/**
+ * @devteks/progress
+ * node ascii progress bar
+ * Version: 0.0.4
+ * Author: [object Object]
+ * License: MIT
+ * Homepage: https://github.com/mosamuhana/node-progress
+ */
+
+import { Transform, TransformCallback } from 'node:stream';
+
+interface Progress {
+    percent: number;
+    current: number;
+    total: number;
+    remaining: number;
+    eta: number;
+    runtime: number;
+    speed: number;
+}
+
+declare type ProgressBarCompleteListener = (bar: ProgressBar) => void;
 /**
  * These are keys in the options object you can pass to the progress bar
  * along with total as seen in the example above.
  */
-export interface ProgressBarOptions {
+interface ProgressBarOptions {
     /**
      * Format of progress with tokens
     */
@@ -18,13 +38,17 @@ export interface ProgressBarOptions {
      */
     current?: number;
     /**
-     * The displayed width of the progress bar defaulting to total.
+     * The displayed width of the progress bar.
      */
     width?: number;
     /**
+     * The minimum displayed width of the progress bar.
+     */
+    minWidth?: number;
+    /**
      * minimum time between updates in milliseconds defaulting to 16
      */
-    throttle?: number;
+    interval?: number;
     /**
      * The output stream defaulting to stderr.
      */
@@ -36,19 +60,23 @@ export interface ProgressBarOptions {
     /**
      * Optional function to call when the progress bar completes.
      */
-    onComplete?: CompleteFn;
+    onComplete?: ProgressBarCompleteListener;
     /**
-     * Completion character defaulting to "=".
+     * Completion character defaulting to "█".
      */
     completeChar?: string;
     /**
-    * Incomplete character defaulting to "-".
+    * Incomplete character defaulting to "░".
     */
     incompleteChar?: string;
     /**
      * terminal line
     */
     line?: number;
+    /**
+     * format current, total and speed values
+    */
+    formatValue?: (value: number) => string;
 }
 /**
  * Initialize a `ProgressBar` with `options`.
@@ -59,11 +87,12 @@ export interface ProgressBarOptions {
  *   - `current` current completed index
  *   - `total` total number of ticks to complete
  *   - `width` the displayed width of the progress bar defaulting to total
+ *   - `minWidth` The minimum displayed width of the progress bar.
  *   - `stream` the output stream defaulting to stderr
  *   - `head` head character defaulting to complete character
  *   - `complete` completion character defaulting to "="
  *   - `incomplete` incomplete character defaulting to "-"
- *   - `throttle` minimum time between updates in milliseconds defaulting to 16
+ *   - `interval` minimum time between updates in milliseconds defaulting to 16
  *   - `onComplete` optional function to call when the progress bar completes
  *   - `clear` will clear the progress bar upon termination
  *
@@ -75,30 +104,16 @@ export interface ProgressBarOptions {
  *   - `{elapsed}` time elapsed in seconds
  *   - `{percent}` completion percentage
  *   - `{eta}` eta in seconds
- *   - `{rate}` rate of ticks per second
+ *   - `{speed}` speed of ticks per second
  *
  * @param {ProgressBarOptions} options
  */
-export declare class ProgressBar {
-    private _tokens?;
-    private _lastDraw;
-    private _start?;
-    private _completed;
-    private _format;
-    private _total;
-    private _current;
-    private _width;
-    private _throttle;
-    private _stream;
-    private _clear;
-    private _onComplete;
-    private _completeChar;
-    private _incompleteChar;
-    private _line?;
+declare class ProgressBar {
+    #private;
     get completed(): boolean;
-    get current(): number;
     get total(): number;
     set total(v: number);
+    get progress(): Progress;
     constructor(options?: ProgressBarOptions);
     /**
      * "tick" the progress bar with optional `current` and optional custom `tokens`.
@@ -111,14 +126,35 @@ export declare class ProgressBar {
      */
     tick(current?: number, customTokens?: Record<string, string>): void;
     interrupt(message: string): void;
-    /**
-     * Method to render the progress bar with optional `tokens` to place in the
-     * progress bar's `fmt` field.
-     *
-     * @param {object} tokens
-     * @api public
-     */
-    private _render;
 }
-export {};
-//# sourceMappingURL=index.d.ts.map
+
+declare type ProgressListener = (progress: Progress) => void;
+declare type TotalListener = (total: number) => void;
+interface ProgressStreamOptions {
+    interval?: number;
+    total?: number;
+    current?: number;
+    onProgress?: ProgressListener;
+    onTotal?: TotalListener;
+}
+interface ProgressStream extends Transform {
+    on(event: 'progress', listener: ProgressListener): this;
+    on(event: 'total', listener: TotalListener): this;
+    once(event: 'progress', listener: ProgressListener): this;
+    once(event: 'total', listener: TotalListener): this;
+    off(event: 'progress', listener: ProgressListener): this;
+    off(event: 'total', listener: TotalListener): this;
+    on(event: string | symbol, listener: (...args: any[]) => void): this;
+    once(event: string | symbol, listener: (...args: any[]) => void): this;
+}
+declare class ProgressStream extends Transform {
+    #private;
+    get progress(): Progress;
+    get total(): number;
+    set total(v: number);
+    constructor({ total, interval, current, onProgress, onTotal }?: ProgressStreamOptions);
+    _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void;
+    _flush(callback: TransformCallback): void;
+}
+
+export { Progress, ProgressBar, ProgressBarOptions, ProgressStream, ProgressStreamOptions };

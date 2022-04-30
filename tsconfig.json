@@ -1,22 +1,28 @@
 {
 	"compilerOptions": {
-		"module": "CommonJS",
-		"target": "ES2017",
-		"types": ["node"],
+		"module": "commonjs",
+		"target": "esnext",
+		"allowSyntheticDefaultImports": true,
 		"declaration": true,
-		"declarationMap": true,
-		"outDir": "./dist",
-		"strict": true,
-		"moduleResolution": "node",
-		"rootDirs": ["./src"],
-		"typeRoots": ["./node_modules/@types"],
 		"esModuleInterop": true,
-		"inlineSourceMap": false,
-		"inlineSources": false,
+		"lib": ["es2015"],
+		"moduleResolution": "node",
+		"newLine": "LF",
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"sourceMap": true,
+		"strict": true,
+		"outDir": "dist",
+		"types": ["node"],
+		"rootDirs": ["./src"],
 		"forceConsistentCasingInFileNames": true
 	},
+	"include": [
+		"src/**/*.ts"
+	],
 	"exclude": [
-		"node_modules",
-		"dist"
+		"node_modules"
 	]
 }
